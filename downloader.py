@@ -84,7 +84,8 @@ def read_already_flag():
 
 
 def write_latest_flag(old_flag, new_flag):
-    os.remove(old_flag + '.flag')
+    if old_flag:
+        os.remove(old_flag + '.flag')
     f = open(new_flag + '.flag', 'w')
     f.close()
 
