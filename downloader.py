@@ -18,7 +18,7 @@ PLEASE MODIFY THE HEADERS BELOW! COPY THE HEADERS FROM YOUR BROWSER WHEN YOU VIS
 LOGIN FIRST AND THEN USE CHROME'S DEV TOOLS TO GET THE HEADERS.
 """
 headers = {
-    'cookie': '__cfduid=ddasdfasdfasdfasdf22209685; _ga=GA1.2.1721029897.1522209687; _gid=GA1.2.2122659710.1522209687; csrftoken=5VGxia5Jpn8s2sPNasdfasdfasdfRMOThVHsDA41U176qb8ry2auaRDMDNKS; LEETCODE_SESSION=eyJasdfasdfasdfdXNlcl9zbHVnIjoia2luZ25hbWUiLCJfYXV0aF91c2VyX2lkIjoiODMxMTciLCJSRU1PVEVfQUasdfasdfasdfCI6IjIwMTgtMDMtMjgwiX2F1dGhfdXNlcl9iYWNrZW5kIjasdfasdfasdfaGVudGljYXRpb25CYWNrZW5kIiwiaWQiOjgzMTE3LCJhdmF0YXasdffgasdfasdfasdfy5ncmF2YXRhci5jb20asdfasdfasdfjQ0NWNkYTNmYTEwN2U0ZDI1Mjk0MzNhLnBuZz9zPTIwMCIsIl9zZXNzaW9uX2V4cGlyeSI6MCwiX2F1dGhfdXNlcl9oYXNoIjoiNzUwNTI4ZWM0Mjk2YTAyMWEzNDA0YTg5OGQwMmI0NGYwOWJlZDRmNCIsImVtYWlsIjoiZ3JlZW5asdfasfasdf; __atuvc=8%7C13; __atuvs=5abb3f2a9ffd0ce1003; _gat=1',
+    'cookie': '!!!!!!WRITE THE COOKIES HERE!!!!!',
     'referer': 'https://leetcode.com/submissions/',
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
 }
@@ -78,9 +78,21 @@ def fetch_submission(row):
                code_info['format_code'])
 
 
+def read_already_flag():
+    flag = [x.split('.')[0] for x in os.listdir('.') if x.endswith('.flag')]
+    return max(flag) if flag else None
+
+
+def write_latest_flag(old_flag, new_flag):
+    os.remove(old_flag + '.flag')
+    f = open(new_flag + '.flag', 'w')
+    f.close()
+
+
 def get_submission_list():
     offset = 0
     last_key = ''
+    latest_flag = read_already_flag()
     while True:
         print(offset)
         submission_info = fetch_submission_list_json(offset, last_key)
@@ -88,7 +100,14 @@ def get_submission_list():
         if not has_next:
             break
         submission_list = submission_info['submissions_dump']
+
+        if offset == 0 and submission_list:
+            new_flag = re.search('(\d+)', submission_list[0]['url']).group(1)
+            write_latest_flag(latest_flag, new_flag)
+
         for submission in submission_list:
+            if latest_flag and latest_flag in submission['url']:
+                return
             if submission['status_display'] == 'Accepted':
                 fetch_submission(submission)
         last_key = submission_info['last_key']
